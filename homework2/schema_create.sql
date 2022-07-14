@@ -41,7 +41,7 @@ CREATE TABLE public.customer(
 	CONSTRAINT customer_pkey PRIMARY KEY (id),
 	CONSTRAINT customer_fio_unique UNIQUE (fio)
 );
-CREATE INDEX idx_customer_name ON supplier USING btree (name);
+CREATE INDEX idx_customer_fio ON customer USING btree (fio);
 
 
 CREATE TABLE public.purchases(
