@@ -73,7 +73,7 @@ CREATE TABLE eshop.item_modifications(
 	name varchar(50) NOT NULL,
 	description varchar(200),
 	CONSTRAINT modifications_pkey PRIMARY KEY (id),
-	CONSTRAINT modifications_name_unique UNIQUE (name)
+	CONSTRAINT modifications_name_unique UNIQUE (name, item_id)
 ) tablespace tables_tbs;
 CREATE INDEX idx_item_modifications_name ON eshop.item_modifications USING btree (name) tablespace indexs_tbs;
 CREATE INDEX idx_item_modifications_item_id ON eshop.item_modifications USING btree (item_id) tablespace indexs_tbs;
@@ -90,7 +90,7 @@ CREATE TABLE eshop.items(
 	category_id int8 NOT NULL,
 	supplier_id int8 NOT NULL,
 	manufactory_id int8 NOT NULL,
-	name varchar(50) NOT NULL,
+	name varchar(200) NOT NULL,
 	description varchar(200),
 	stock_balance int8 NOT NUll default 0,
 	CONSTRAINT items_pkey PRIMARY KEY (id),

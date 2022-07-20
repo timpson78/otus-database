@@ -100,7 +100,7 @@ CREATE TABLE public.items_modifications(
 	description varchar(200),
 	part_number varchar(20) NOT NUll,
 	CONSTRAINT items_modifications_pkey PRIMARY KEY (id),
-	CONSTRAINT items_modifications_name_unique UNIQUE (name)
+	CONSTRAINT items_modifications_name_unique UNIQUE (name, item_id)
 );
 CREATE INDEX idx_items_modifications_name ON items_modifications USING btree (name);
 CREATE INDEX idx_items_modifications_part_number ON items_modifications USING btree (part_number);
@@ -113,7 +113,7 @@ CREATE TABLE public.price(
 	id serial NOT NULL,
 	item_modification_id int8 NOT NULL,
 	currency_id int8 NOT NULL,
-	price bigint NOT NULL,
+	price numeric NOT NULL,
 	discount bigint NOT NULL default 0,
 	CONSTRAINT price_pkey PRIMARY KEY (id)
 );
