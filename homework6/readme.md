@@ -121,7 +121,8 @@
     CREATE INDEX idx_passanger_name_lower ON bookings.tickets  (lower(passenger_name));
   
     explain (costs, verbose, format json)
-    select * from bookings.tickets where lower(passenger_name) = lower('TATYANA KUZNECOVA') 
+    select * from bookings.tickets where lower(passenger_name) = lower('TATYANA KUZNECOVA')
+     
      `[
        {
          "Plan": {
