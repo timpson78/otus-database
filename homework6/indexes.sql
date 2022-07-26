@@ -17,3 +17,8 @@ CREATE INDEX idx_items_fulltext ON eshop.items USING gin (description_fulltext);
 ---- индекс по функции
 
 CREATE INDEX idx_manufactory_name_lower ON eshop.manufacturer  (lower(name));
+
+--- составной индекс
+
+
+CREATE INDEX idx_passangername_bookref_complex ON bookings.tickets  (book_ref, passenger_name);

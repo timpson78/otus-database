@@ -1,12 +1,14 @@
-**Домашнее задание 6**
+##### **Домашнее задание 6**
 
-1.  Создан индекс btree по id
+1.  **Создание любого индекса**
+    
+    Создан индекс btree по id
     CREATE UNIQUE INDEX items_pkey ON public.items USING btree (id)
     
     Результаты работы explain показывают, что при операциях сравнения btree индекс использует Index Scan 
 
     explain (costs, verbose, format json)   select * from items where id >2 and id < 7
-2. [
+2.` [
   {
     "Plan": {
       "Node Type": "Index Scan",
@@ -24,11 +26,12 @@
       "Index Cond": "((items.id > 2) AND (items.id < 7))"
     }
   }
-]
+]`
 
-3. Использовать индекс для полнотекстового поиска на моих данных так и не получилось
+3. **Использовать индекс для полнотекстового поиска на моих данных так и не получилось**
     
-    Рассмотрел два варианта
+    _Рассмотрел два варианта_
+    
     3.1.  Создал новое поле description_fulltext типа tsvector и заполнил данными с description
     
     ALTER TABLE public.items ADD description_fulltext tsvector NULL;
@@ -52,7 +55,7 @@
     explain (costs, verbose, format json) 
     select * from eshop.items where  description_fulltext  @@ plainto_tsquery('radeon')
     
-    [
+    `[
       {
         "Plan": {
           "Node Type": "Seq Scan",
@@ -68,7 +71,7 @@
           "Filter": "(items.description_fulltext @@ plainto_tsquery('radeon'::text))"
         }
       }
-    ]
+    ]`
     
     3.2. Создал индекс для  текстового поля description на основе функции to_tsvector
   
@@ -81,7 +84,7 @@
     explain (costs, verbose, format json)
     select * from eshop.items where  to_tsvector('russian', description)  @@ plainto_tsquery('russian', 'оперативная')
   
-      [
+     ` [
         {
           "Plan": {
             "Node Type": "Seq Scan",
@@ -97,61 +100,31 @@
             "Filter": "(to_tsvector('russian'::regconfig, (items.description)::text) @@ '''оперативн'''::tsquery)"
           }
         }
-      ]
+      ]`
 
-4. Индексы на функцию
+4. **Индексы на функцию**
 
-  Предположим у нас справочник поставщиков заполняется автоматически и записи все с заглавной буквы
+    Предположим у нас справочник поставщиков заполняется автоматически и записи все с заглавной буквы
+    тогда имеет смысл создать индекс по функции lower()
   
-  тогда имеет смысл создать индекс по функции lower()
+    CREATE INDEX idx_manufactory_name_lower ON eshop.manufactory (lower(name));
   
-  CREATE INDEX idx_manufactory_name_lower ON eshop.manufactory (lower(name));
+    select * from eshop.manufacturer m where lower(m.name) = 'производитель1'   
   
-  select * from eshop.manufacturer m where lower(m.name) = 'производитель1'   
+    --- и опять не задействован индекс... предполагаю, что  у меня в базе мало данных и поэтому планировщик выбирает  
+    --- последовательное сканирование вместо сканирование индекса
   
-  --- и опять не задействован индекс... предполагаю, что  у меня в базе мало данных и поэтому планировщик выбирает  
-  --- последовательное сканирование вместо сканирование индекса
+    проверил работу на БД bookings - все работает:
   
-  проверил работу на БД bookings - все работает:
+    CREATE INDEX idx_passanger_name_lower ON bookings.tickets  (lower(passenger_name));
   
-  CREATE INDEX idx_passanger_name_lower ON bookings.tickets  (lower(passenger_name));
-  
-  explain (costs, verbose, format json)
-  select * from bookings.tickets where lower(passenger_name) = lower('TATYANA KUZNECOVA') 
+    explain (costs, verbose, format json)
+    select * from bookings.tickets where lower(passenger_name) = lower('TATYANA KUZNECOVA') 
  
   
-  [
-    {
-      "Plan": {
-        "Node Type": "Bitmap Heap Scan",
-        "Parallel Aware": false,
-        "Relation Name": "tickets",
-        "Schema": "bookings",
-        "Alias": "tickets",
-        "Startup Cost": 23.44,
-        "Total Cost": 1725.20,
-        "Plan Rows": 1834,
-        "Plan Width": 104,
-        "Output": ["ticket_no", "book_ref", "passenger_id", "passenger_name", "contact_data"],
-        "Recheck Cond": "(lower(tickets.passenger_name) = 'tatyana kuznecova'::text)",
-        "Plans": [
-          {
-            "Node Type": "Bitmap Index Scan",
-            "Parent Relationship": "Outer",
-            "Parallel Aware": false,
-            "Index Name": "idx_passanger_name_lower",
-            "Startup Cost": 0.00,
-            "Total Cost": 22.98,
-            "Plan Rows": 1834,
-            "Plan Width": 0,
-            "Index Cond": "(lower(tickets.passenger_name) = 'tatyana kuznecova'::text)"
-          }
-        ]
-      }
-    }
-  ]
+  
     
-5. Составной индекс
+5. **Составной индекс**
 
   Создал составной индекс на базе демо версии БД bookings
   
@@ -162,7 +135,7 @@
   explain (costs, verbose, format json)
   select * from bookings.tickets where passenger_name = 'TATYANA KUZNECOVA' and book_ref = '00D64E'
   
-  [
+  `[
     {
       "Plan": {
         "Node Type": "Index Scan",
@@ -180,7 +153,7 @@
         "Index Cond": "((tickets.book_ref = '00D64E'::bpchar) AND (tickets.passenger_name = 'TATYANA KUZNECOVA'::text))"
       }
     }
-  ]
+  ]`
     
     
       
