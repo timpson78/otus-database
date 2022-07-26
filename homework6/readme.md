@@ -8,27 +8,29 @@
     Результаты работы explain показывают, что при операциях сравнения btree индекс использует Index Scan 
 
     explain (costs, verbose, format json)   select * from items where id >2 and id < 7
-2.` [
-  {
-    "Plan": {
-      "Node Type": "Index Scan",
-      "Parallel Aware": false,
-      "Scan Direction": "Forward",
-      "Index Name": "items_pkey",
-      "Relation Name": "items",
-      "Schema": "public",
-      "Alias": "items",
-      "Startup Cost": 0.14,
-      "Total Cost": 2.36,
-      "Plan Rows": 1,
-      "Plan Width": 572,
-      "Output": ["id", "category_id", "supplier_id", "manufactory_id", "name", "description", "stock_balance"],
-      "Index Cond": "((items.id > 2) AND (items.id < 7))"
-    }
-  }
-]`
+2.  **Результат explain**
 
-3. **Использовать индекс для полнотекстового поиска на моих данных так и не получилось**
+    ` [
+      {
+        "Plan": {
+          "Node Type": "Index Scan",
+          "Parallel Aware": false,
+          "Scan Direction": "Forward",
+          "Index Name": "items_pkey",
+          "Relation Name": "items",
+          "Schema": "public",
+          "Alias": "items",
+          "Startup Cost": 0.14,
+          "Total Cost": 2.36,
+          "Plan Rows": 1,
+          "Plan Width": 572,
+          "Output": ["id", "category_id", "supplier_id", "manufactory_id", "name", "description", "stock_balance"],
+          "Index Cond": "((items.id > 2) AND (items.id < 7))"
+        }
+      }
+    ]`
+
+3.  **Использовать индекс для полнотекстового поиска на моих данных так и не получилось**
     
     _Рассмотрел два варианта_
     
@@ -102,7 +104,7 @@
         }
       ]`
 
-4. **Индексы на функцию**
+4.  **Индексы на функцию**
 
     Предположим у нас справочник поставщиков заполняется автоматически и записи все с заглавной буквы
     тогда имеет смысл создать индекс по функции lower()
@@ -121,39 +123,37 @@
     explain (costs, verbose, format json)
     select * from bookings.tickets where lower(passenger_name) = lower('TATYANA KUZNECOVA') 
  
-  
-  
-    
-5. **Составной индекс**
+   
+5.  **Составной индекс**
 
-  Создал составной индекс на базе демо версии БД bookings
+    Создал составной индекс на базе демо версии БД bookings
   
-  CREATE INDEX idx_passangername_bookref_complex ON bookings.tickets  (book_ref, passenger_name);
-  analyze bookings.tickets
+    CREATE INDEX idx_passangername_bookref_complex ON bookings.tickets  (book_ref, passenger_name);
+    analyze bookings.tickets
   
-  Анализ показывает эффективность использования индекса
-  explain (costs, verbose, format json)
-  select * from bookings.tickets where passenger_name = 'TATYANA KUZNECOVA' and book_ref = '00D64E'
+    Анализ показывает эффективность использования индекса
+    explain (costs, verbose, format json)
+    select * from bookings.tickets where passenger_name = 'TATYANA KUZNECOVA' and book_ref = '00D64E'
   
-  `[
-    {
-      "Plan": {
-        "Node Type": "Index Scan",
-        "Parallel Aware": false,
-        "Scan Direction": "Forward",
-        "Index Name": "idx_passangername_bookref_complex",
-        "Relation Name": "tickets",
-        "Schema": "bookings",
-        "Alias": "tickets",
-        "Startup Cost": 0.42,
-        "Total Cost": 2.64,
-        "Plan Rows": 1,
-        "Plan Width": 104,
-        "Output": ["ticket_no", "book_ref", "passenger_id", "passenger_name", "contact_data"],
-        "Index Cond": "((tickets.book_ref = '00D64E'::bpchar) AND (tickets.passenger_name = 'TATYANA KUZNECOVA'::text))"
-      }
-    }
-  ]`
+      `[
+        {
+          "Plan": {
+            "Node Type": "Index Scan",
+            "Parallel Aware": false,
+            "Scan Direction": "Forward",
+            "Index Name": "idx_passangername_bookref_complex",
+            "Relation Name": "tickets",
+            "Schema": "bookings",
+            "Alias": "tickets",
+            "Startup Cost": 0.42,
+            "Total Cost": 2.64,
+            "Plan Rows": 1,
+            "Plan Width": 104,
+            "Output": ["ticket_no", "book_ref", "passenger_id", "passenger_name", "contact_data"],
+            "Index Cond": "((tickets.book_ref = '00D64E'::bpchar) AND (tickets.passenger_name = 'TATYANA KUZNECOVA'::text))"
+          }
+        }
+      ]`
     
     
       
