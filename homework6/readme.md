@@ -122,7 +122,37 @@
   
     explain (costs, verbose, format json)
     select * from bookings.tickets where lower(passenger_name) = lower('TATYANA KUZNECOVA') 
- 
+     `[
+       {
+         "Plan": {
+           "Node Type": "Bitmap Heap Scan",
+           "Parallel Aware": false,
+           "Relation Name": "tickets",
+           "Schema": "bookings",
+           "Alias": "tickets",
+           "Startup Cost": 5.51,
+           "Total Cost": 401.58,
+           "Plan Rows": 373,
+           "Plan Width": 104,
+           "Output": ["ticket_no", "book_ref", "passenger_id", "passenger_name", "contact_data"],
+           "Recheck Cond": "(lower(tickets.passenger_name) = 'tatyana kuznecova'::text)",
+           "Plans": [
+             {
+               "Node Type": "Bitmap Index Scan",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Index Name": "idx_passanger_name_lower",
+               "Startup Cost": 0.00,
+               "Total Cost": 5.42,
+               "Plan Rows": 373,
+               "Plan Width": 0,
+               "Index Cond": "(lower(tickets.passenger_name) = 'tatyana kuznecova'::text)"
+             }
+           ]
+         }
+       }
+     ]`
+   
    
 5.  **Составной индекс**
 
