@@ -163,6 +163,7 @@
     analyze bookings.tickets
   
     Анализ показывает эффективность использования индекса
+    
     explain (costs, verbose, format json)
     select * from bookings.tickets where passenger_name = 'TATYANA KUZNECOVA' and book_ref = '00D64E'
   
